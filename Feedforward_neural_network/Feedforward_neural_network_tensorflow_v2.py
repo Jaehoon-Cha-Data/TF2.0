@@ -6,11 +6,11 @@ Created on Wed Jun 26 17:33:00 2019
 
 @email: chajaehoon79@gmail.com
 
-Multi-Layer Perceptron keras in tensorflow
+FNN in tensorflow_v2
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Dense
 from tensorflow.keras import Model
 import numpy as np 
 import pandas as pd
@@ -55,21 +55,24 @@ test_y = np.array(test[:,3:])
 
 n_samples = len(train_x)
 
-class MLP(Model):
+train_ds = tf.data.Dataset.from_tensor_slices(
+    (train_x, train_y)).shuffle(n_samples).batch(config['batch_size'])
+test_ds = tf.data.Dataset.from_tensor_slices((test_x, test_y)).batch(config['batch_size'])
+
+class FNN(Model):
     def __init__(self):
-        super(MLP, self).__init__()
-        self.flatten = Flatten()
+        super(FNN, self).__init__()
         self.d1 = Dense(64, activation='sigmoid')
         self.d2 = Dense(32, activation='sigmoid')
         self.d3 = Dense(1)
 
     def call(self, x):
-        x = self.flatten(x)
         x = self.d1(x)
         x = self.d2(x)
         return self.d3(x)
+    
 
-model = MLP()
+model = FNN()
 
 optimizer = tf.keras.optimizers.Adam(lr=0.01)
 loss_object = tf.keras.losses.MeanSquaredError()
@@ -95,18 +98,12 @@ def test_step(X, Y):
 
     test_loss(t_loss)
     
-    
-Epochs = config['epochs']
-Batch_size = config['batch_size']
 
 ### run ###
 def runs():
-    Iter_in_epoch = int(n_samples/Batch_size)
-    
-    for epoch in range(Epochs):
-        for _ in range(Iter_in_epoch):
-            rnd_idx = np.random.choice(range(n_samples), Batch_size, replace=False)
-            train_step(train_x[rnd_idx], train_y[rnd_idx])
+    for epoch in range(config['epochs']):
+        for epoch_x, epoch_y in train_ds:
+            train_step(epoch_x, epoch_y)
     
         test_step(test_x, test_y)
     
@@ -125,8 +122,8 @@ test_predict_y = model(test_x)
 ### mean squared error ###
 train_mse = loss_object(train_y, train_predict_y)
 test_mse = loss_object(test_y, test_predict_y)
-print('train RMSE is %.4f' %(train_mse))
-print('test RMSE is %.4f' %(test_mse))
+print('train MSE is %.4f' %(train_mse))
+print('test MSE is %.4f' %(test_mse))
 
 
 ### font size ###
