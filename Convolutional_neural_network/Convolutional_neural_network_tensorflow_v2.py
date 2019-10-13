@@ -8,7 +8,6 @@ Created on Sun Oct 13 17:00:20 2019
 
 CNN in tensorflow_v2
 """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPool2D
